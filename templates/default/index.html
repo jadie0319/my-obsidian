@@ -64,26 +64,26 @@
       var basePath = '{{basePath}}';
       var data = JSON.parse(document.getElementById('graph-data').textContent);
 
-      // Collect flat tag list with counts
+      // Collect flat tag list with counts, splitting by '/'
       var tagCounts = {};
       data.nodes.forEach(function(n) {
         (n.tags || []).forEach(function(tag) {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          tag.split('/').forEach(function(part) {
+            var t = part.trim();
+            if (t) tagCounts[t] = (tagCounts[t] || 0) + 1;
+          });
         });
       });
 
       // Sort tags alphabetically
       var tags = Object.keys(tagCounts).sort();
 
-      // Render flat tag list as clickable links
+      // Render flat tag list as single buttons (name + count combined)
       var html = '<div class="tag-flat-list">';
       tags.forEach(function(tag) {
         var count = tagCounts[tag];
         var url = basePath + 'tags/' + tag + '/';
-        html += '<a href="' + url + '" class="tag-flat-item">';
-        html += '<span class="tag-flat-name">' + tag + '</span>';
-        html += '<span class="tag-count">' + count + '</span>';
-        html += '</a>';
+        html += '<a href="' + url + '" class="tag-flat-item">#' + tag + ' (' + count + ')</a>';
       });
       html += '</div>';
 

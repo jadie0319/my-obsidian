@@ -447,14 +447,13 @@ footer {
 }
 
 .tag-flat-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: inline-block;
   padding: 6px 12px;
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 20px;
   font-size: 0.875em;
+  font-weight: 500;
   color: var(--color-text);
   text-decoration: none;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -464,10 +463,6 @@ footer {
   background: var(--color-border);
   border-color: var(--color-text-secondary);
   color: var(--color-text);
-}
-
-.tag-flat-name {
-  font-weight: 500;
 }
 
 /* Tag page */
