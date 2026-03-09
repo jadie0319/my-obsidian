@@ -20,7 +20,6 @@ class GraphView {
     this.simulation = null;
     this.g = null;
     this.tooltip = null;
-    this.activeTag = '';
     this.currentZoom = 1;
     this.nodeLabels = null;
   }
@@ -297,50 +296,31 @@ class GraphView {
       });
     });
 
-    const tags = Array.from(tagCounts.keys()).sort();
+    const tags = Array.from(tagCounts.entries())
+      .sort((a, b) => {
+        if (b[1] !== a[1]) {
+          return b[1] - a[1];
+        }
+
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, 7);
+
     if (tags.length === 0) {
       container.innerHTML = '';
       return;
     }
 
-    container.innerHTML = tags.map(tag => `
-      <button class="graph-tag-chip" data-tag="${tag}" type="button">
-        <span class="graph-tag-chip-dot" style="background:${this.graphData.tagColors[tag] || '#6b7280'}"></span>
-        <span>#${tag}</span>
-        <span class="graph-tag-chip-count">${tagCounts.get(tag)}</span>
-      </button>
-    `).join('');
-
-    container.querySelectorAll('.graph-tag-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const nextTag = this.activeTag === chip.dataset.tag ? '' : chip.dataset.tag;
-        this.activeTag = nextTag;
-
-        const tagFilter = document.getElementById('tag-filter');
-        const searchInput = document.getElementById('search-input');
-        const showOrphansCheckbox = document.getElementById('show-orphans-only');
-
-        if (tagFilter) {
-          tagFilter.value = nextTag;
-        }
-
-        this.updateTagLegendState();
-        this.filter(
-          searchInput ? searchInput.value : '',
-          nextTag,
-          showOrphansCheckbox ? showOrphansCheckbox.checked : false
-        );
-      });
-    });
-
-    this.updateTagLegendState();
-  }
-
-  updateTagLegendState() {
-    const chips = document.querySelectorAll('.graph-tag-chip');
-    chips.forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.tag === this.activeTag);
-    });
+    container.innerHTML = `
+      <div class="graph-tag-legend-title">Top tags</div>
+      ${tags.map(([tag, count]) => `
+        <div class="graph-tag-item">
+          <span class="graph-tag-item-dot" style="background:${this.graphData.tagColors[tag] || '#6b7280'}"></span>
+          <span class="graph-tag-item-name">#${tag}</span>
+          <span class="graph-tag-item-count">${count}</span>
+        </div>
+      `).join('')}
+    `;
   }
 }
 
@@ -385,8 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   tagFilter.addEventListener('change', (e) => {
-    graphView.activeTag = e.target.value;
-    graphView.updateTagLegendState();
     graphView.filter(
       searchInput.value,
       e.target.value,
@@ -406,8 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.value = '';
     tagFilter.value = '';
     showOrphansCheckbox.checked = false;
-    graphView.activeTag = '';
-    graphView.updateTagLegendState();
     graphView.reset();
   });
 
