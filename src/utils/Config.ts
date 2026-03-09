@@ -23,7 +23,11 @@ export class ConfigManager {
     };
 
     try {
-      return ConfigSchema.parse(mergedConfig);
+      const config = ConfigSchema.parse(mergedConfig);
+      return {
+        ...config,
+        basePath: this.normalizeBasePath(config.basePath),
+      };
     } catch (error) {
       logger.error('Configuration validation failed', error as Error);
       if (error instanceof ZodError) {
@@ -51,6 +55,17 @@ export class ConfigManager {
       ...(cliOptions.basePath && { basePath: cliOptions.basePath }),
       ...(cliOptions.template && { template: cliOptions.template }),
     };
+  }
+
+  private static normalizeBasePath(basePath: string): string {
+    const trimmed = basePath.trim();
+
+    if (!trimmed || trimmed === '/') {
+      return '/';
+    }
+
+    const withoutSlashes = trimmed.replace(/^\/+|\/+$/g, '');
+    return `/${withoutSlashes}/`;
   }
 
   static async generateConfigFile(outputPath: string): Promise<void> {

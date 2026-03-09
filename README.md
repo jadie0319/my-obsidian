@@ -113,7 +113,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install -g my-obsidian
-      - run: my-obsidian build --source ./vault --output ./dist
+      - run: my-obsidian build --source ./vault --output ./dist --base-path /your-repo-name/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
@@ -151,6 +151,31 @@ git push origin main
 ```
 
 GitHub Actions가 자동으로 실행되어 사이트가 배포됩니다!
+
+### 5. basePath 설정
+
+GitHub Pages URL 형태에 따라 `basePath`를 맞춰야 정적 리소스와 graph view가 정상 동작합니다.
+
+- User/Organization site: `https://<user>.github.io/`
+  - `basePath: "/"`
+- Project site: `https://<user>.github.io/<repo>/`
+  - `basePath: "/<repo>/"`
+
+예를 들어 repository가 `your-repo-name`이고 배포 URL이 `https://<user>.github.io/your-repo-name/` 라면 아래 둘 중 하나로 빌드해야 합니다.
+
+```bash
+my-obsidian build --source ./vault --output ./dist --base-path /your-repo-name/
+```
+
+```json
+{
+  "source": "./vault",
+  "output": "./dist",
+  "basePath": "/your-repo-name/"
+}
+```
+
+`site.url`을 사용하는 경우에는 `https://<user>.github.io/your-repo-name` 로 설정하세요.
 
 ## Obsidian 기능 지원
 

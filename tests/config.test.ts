@@ -56,4 +56,28 @@ describe('ConfigManager.loadConfig', () => {
       'Invalid configuration: source is required. Provide it with --source or in your config file.'
     );
   });
+
+  it('normalizes basePath from config for project GitHub Pages sites', async () => {
+    const configPath = await createTempConfig({
+      source: './vault',
+      basePath: 'project-site',
+    });
+
+    const config = await ConfigManager.loadConfig(configPath);
+
+    expect(config.basePath).toBe('/project-site/');
+  });
+
+  it('normalizes basePath from CLI options', async () => {
+    const configPath = await createTempConfig({
+      source: './vault',
+      basePath: '/',
+    });
+
+    const config = await ConfigManager.loadConfig(configPath, {
+      basePath: '/project-site',
+    });
+
+    expect(config.basePath).toBe('/project-site/');
+  });
 });
