@@ -153,7 +153,7 @@ export class MarkdownProcessor {
               });
             }
 
-            const imagePath = `/assets/images/${PathResolver.slugify(path.parse(embedText).name)}${path.extname(embedText)}`;
+            const imagePath = `${this.config.basePath}assets/images/${PathResolver.slugify(path.parse(embedText).name)}${path.extname(embedText)}`;
             embeds.push(embedText);
 
             newNodes.push({

@@ -80,6 +80,7 @@ my-obsidian build --config obsidian.config.json
 ```
 
 이 경우 `obsidian.config.json` 안에 `source`가 포함되어 있어야 합니다. `--source`를 함께 지정하면 설정 파일의 값을 덮어씁니다.
+마찬가지로 다른 옵션도 CLI에서 명시적으로 넘긴 값만 설정 파일을 덮어씁니다.
 
 ## GitHub Pages 배포
 

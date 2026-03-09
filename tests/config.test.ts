@@ -80,4 +80,37 @@ describe('ConfigManager.loadConfig', () => {
 
     expect(config.basePath).toBe('/project-site/');
   });
+
+  it('does not override config values with absent CLI options', async () => {
+    const configPath = await createTempConfig({
+      source: './vault',
+      output: './site-dist',
+      basePath: '/my-obsidian-pages/',
+      template: 'custom-template',
+    });
+
+    const config = await ConfigManager.loadConfig(configPath, {});
+
+    expect(config.output).toBe('./site-dist');
+    expect(config.basePath).toBe('/my-obsidian-pages/');
+    expect(config.template).toBe('custom-template');
+  });
+
+  it('overrides only explicitly provided CLI options', async () => {
+    const configPath = await createTempConfig({
+      source: './vault',
+      output: './site-dist',
+      basePath: '/my-obsidian-pages/',
+      template: 'default',
+    });
+
+    const config = await ConfigManager.loadConfig(configPath, {
+      output: './public',
+      basePath: '/project-site',
+    });
+
+    expect(config.output).toBe('./public');
+    expect(config.basePath).toBe('/project-site/');
+    expect(config.template).toBe('default');
+  });
 });

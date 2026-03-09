@@ -15,11 +15,11 @@ program
   .command('build')
   .description('Build static site from Obsidian vault')
   .option('-s, --source <path>', 'Source vault directory')
-  .option('-o, --output <path>', 'Output directory', './dist')
+  .option('-o, --output <path>', 'Output directory')
   .option('-e, --exclude <patterns...>', 'Exclude directories/files')
   .option('-c, --config <path>', 'Configuration file')
-  .option('--base-path <path>', 'Base path for URLs', '/')
-  .option('--template <name>', 'Template to use', 'default')
+  .option('--base-path <path>', 'Base path for URLs')
+  .option('--template <name>', 'Template to use')
   .action(buildCommand);
 
 program
