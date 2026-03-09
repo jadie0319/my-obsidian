@@ -35,7 +35,10 @@ class GraphView {
     this.svg = this.container
       .append('svg')
       .attr('width', this.options.width)
-      .attr('height', this.options.height);
+      .attr('height', this.options.height)
+      .attr('viewBox', `0 0 ${this.options.width} ${this.options.height}`)
+      .style('width', '100%')
+      .style('height', '100%');
 
     this.g = this.svg.append('g');
   }
@@ -254,8 +257,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const graphData = JSON.parse(graphDataElement.textContent);
 
+  const containerEl = document.getElementById('graph-container');
+  const containerWidth = containerEl ? (containerEl.clientWidth || containerEl.offsetWidth) : window.innerWidth;
+
   const graphView = new GraphView('graph-container', graphData, {
-    width: window.innerWidth,
+    width: containerWidth,
     height: Math.max(600, window.innerHeight * 0.7)
   });
 
@@ -305,7 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('resize', () => {
-    const newWidth = window.innerWidth;
+    const resizeContainer = document.getElementById('graph-container');
+    const newWidth = resizeContainer ? (resizeContainer.clientWidth || resizeContainer.offsetWidth) : window.innerWidth;
     const newHeight = Math.max(600, window.innerHeight * 0.7);
 
     graphView.options.width = newWidth;
@@ -313,7 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     graphView.svg
       .attr('width', newWidth)
-      .attr('height', newHeight);
+      .attr('height', newHeight)
+      .attr('viewBox', `0 0 ${newWidth} ${newHeight}`);
 
     graphView.simulation
       .force('center', d3.forceCenter(newWidth / 2, newHeight / 2))

@@ -155,8 +155,8 @@ export class GraphDataGenerator {
 
     for (const node of nodes) {
       const totalLinks = linkCounts.get(node.id) || 0;
-      node.size = Math.sqrt(totalLinks) * 6 + 8;
-      node.size = Math.min(node.size, 38);
+      node.size = Math.sqrt(totalLinks) * 10 + 16;
+      node.size = Math.min(node.size, 55);
     }
   }
 

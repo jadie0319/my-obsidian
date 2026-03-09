@@ -31,50 +31,58 @@
     </main>
 
     <aside class="page-sidebar">
-      {{#if properties}}
       <div class="sidebar-section">
         <h3 class="sidebar-title">Properties</h3>
+        {{#if properties}}
         {{#each properties}}
         <div class="property-item">
           <span class="property-key">{{key}}</span>
           <span class="property-value">{{value}}</span>
         </div>
         {{/each}}
+        {{else}}
+        <p class="sidebar-empty">—</p>
+        {{/if}}
       </div>
-      {{/if}}
 
-      {{#if tags}}
       <div class="sidebar-section">
         <h3 class="sidebar-title">Tags</h3>
+        {{#if tags}}
         <div class="sidebar-tags">
           {{#each tags}}
           <span class="tag">{{this}}</span>
           {{/each}}
         </div>
+        {{else}}
+        <p class="sidebar-empty">—</p>
+        {{/if}}
       </div>
-      {{/if}}
 
-      {{#if outlinks}}
       <div class="sidebar-section">
         <h3 class="sidebar-title">Links</h3>
+        {{#if outlinks}}
         <div class="sidebar-links">
           {{#each outlinks}}
           <a href="{{url}}" class="sidebar-link">{{title}}</a>
           {{/each}}
         </div>
+        {{else}}
+        <p class="sidebar-empty">—</p>
+        {{/if}}
       </div>
-      {{/if}}
 
-      {{#if backlinks}}
       <div class="sidebar-section">
         <h3 class="sidebar-title">Backlinks</h3>
+        {{#if backlinks}}
         <div class="sidebar-links">
           {{#each backlinks}}
           <a href="{{url}}" class="sidebar-link">{{title}}</a>
           {{/each}}
         </div>
+        {{else}}
+        <p class="sidebar-empty">—</p>
+        {{/if}}
       </div>
-      {{/if}}
     </aside>
   </div>
 

@@ -42,16 +42,16 @@ body {
 }
 
 .top-nav {
-  background: var(--color-bg);
-  border-bottom: 2px solid var(--color-border);
+  background: #1a1a2e;
+  border-bottom: 2px solid #2d2d4e;
   padding: 0 20px;
-  height: 48px;
+  height: 52px;
   display: flex;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .nav-inner {
@@ -83,10 +83,20 @@ body {
 
 /* Page sidebar */
 .page-sidebar {
-  width: 220px;
+  width: 240px;
   flex-shrink: 0;
   position: sticky;
-  top: 64px;
+  top: 68px;
+  border-left: 1px solid var(--color-border);
+  padding-left: 20px;
+  min-height: 200px;
+}
+
+.sidebar-empty {
+  color: var(--color-text-secondary);
+  font-size: 0.8em;
+  font-style: italic;
+  margin: 4px 0;
 }
 
 .sidebar-section {
@@ -168,11 +178,15 @@ header h1 {
 }
 
 .site-title {
-  font-size: 0.9em;
+  font-size: 1em;
   font-weight: 700;
   text-decoration: none;
-  color: var(--color-text);
+  color: #e8e8f0;
   letter-spacing: -0.01em;
+}
+
+.site-title:hover {
+  color: #ffffff;
 }
 
 .description {
