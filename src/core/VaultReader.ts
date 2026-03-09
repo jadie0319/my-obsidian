@@ -1,5 +1,6 @@
 import { glob } from 'glob';
 import path from 'path';
+import fs from 'fs/promises';
 import { VaultFile, VaultResource, VaultStructure } from '../types/VaultFile';
 import { FileSystem } from '../utils/FileSystem';
 import { PathResolver } from '../utils/PathResolver';
@@ -51,6 +52,8 @@ export class VaultReader {
       const content = await FileSystem.readFile(absolutePath);
       const parsedPath = path.parse(file);
 
+      const stat = await fs.stat(absolutePath);
+
       vaultFiles.push({
         path: file,
         absolutePath,
@@ -59,6 +62,8 @@ export class VaultReader {
         isMarkdown: true,
         basename: parsedPath.name,
         extension: parsedPath.ext,
+        createdAt: stat.birthtime,
+        modifiedAt: stat.mtime,
       });
     }
 

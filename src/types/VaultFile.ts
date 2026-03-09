@@ -6,6 +6,8 @@ export interface VaultFile {
   isMarkdown: boolean;
   basename: string;
   extension: string;
+  createdAt?: Date;
+  modifiedAt?: Date;
 }
 
 export interface VaultResource {

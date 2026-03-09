@@ -33,6 +33,13 @@ export class MarkdownProcessor {
   async process(file: VaultFile): Promise<ProcessedFile> {
     const { frontmatter, content: markdownContent } = FrontMatterParser.parse(file.content);
 
+    if (!frontmatter.created && file.createdAt) {
+      frontmatter.created = file.createdAt.toISOString().split('T')[0];
+    }
+    if (!frontmatter.modified && file.modifiedAt) {
+      frontmatter.modified = file.modifiedAt.toISOString().split('T')[0];
+    }
+
     const title = FrontMatterParser.extractTitle(frontmatter, markdownContent, file.basename);
     const slug = PathResolver.slugify(file.basename);
     const outputPath = PathResolver.toOutputPath(
