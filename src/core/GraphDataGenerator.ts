@@ -64,7 +64,9 @@ export class GraphDataGenerator {
   private createNodes(files: ProcessedFile[]): GraphNode[] {
     return files.map(file => {
       const relativePath = path.relative(this.config.output, file.outputPath);
-      const url = '/' + relativePath.split(path.sep).join('/');
+      const relativeUrl = relativePath.split(path.sep).join('/');
+      const basePath = this.config.basePath.endsWith('/') ? this.config.basePath : this.config.basePath + '/';
+      const url = basePath + relativeUrl;
 
       const tags = file.frontmatter.tags || [];
       const group = tags.length > 0 ? tags[0] : 'untagged';
