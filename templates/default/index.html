@@ -41,21 +41,9 @@
         </header>
 
         <main>
-          <section class="page-list">
-            <h2>All Pages</h2>
-            <ul>
-              {{#each pages}}
-              <li>
-                <a href="{{this.url}}">{{this.title}}</a>
-                {{#if this.description}}
-                <p>{{this.description}}</p>
-                {{/if}}
-                {{#if this.date}}
-                <span class="date">{{this.date}}</span>
-                {{/if}}
-              </li>
-              {{/each}}
-            </ul>
+          <section class="tag-list">
+            <h2>Tags</h2>
+            <div id="tag-list-container"></div>
           </section>
         </main>
 
@@ -72,5 +60,26 @@
   </script>
 
   <script src="{{basePath}}assets/scripts/graph.js"></script>
+  <script>
+    (function() {
+      var data = JSON.parse(document.getElementById('graph-data').textContent);
+      var tagCounts = {};
+      data.nodes.forEach(function(n) {
+        (n.tags || []).forEach(function(t) {
+          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        });
+      });
+      var sorted = Object.keys(tagCounts).sort(function(a, b) {
+        return tagCounts[b] - tagCounts[a];
+      });
+      var container = document.getElementById('tag-list-container');
+      sorted.forEach(function(tag) {
+        var item = document.createElement('span');
+        item.className = 'tag-item';
+        item.innerHTML = tag + '<span class="tag-count">' + tagCounts[tag] + '</span>';
+        container.appendChild(item);
+      });
+    })();
+  </script>
 </body>
 </html>

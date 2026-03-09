@@ -9,7 +9,8 @@
 
 .graph-section {
   position: relative;
-  width: 100%;
+  width: 80%;
+  margin: 0 auto;
   height: 70vh;
   min-height: 600px;
   background: var(--color-bg);
@@ -18,7 +19,7 @@
 
 .page-list-section {
   flex: 1;
-  padding: 40px 0;
+  padding: 40px 10%;
   background: var(--color-bg);
 }
 
