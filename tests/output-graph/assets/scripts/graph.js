@@ -28,7 +28,6 @@ class GraphView {
     this.createSimulation();
     this.render();
     this.setupZoom();
-    this.createLegend();
   }
 
   createSVG() {
@@ -205,29 +204,6 @@ class GraphView {
       d3.zoom().transform,
       transform
     );
-  }
-
-  createLegend() {
-    const legend = d3.select('#graph-legend');
-    legend.html('');
-
-    legend.append('h4')
-      .style('margin', '0 0 8px 0')
-      .style('font-size', '14px')
-      .text('Tags');
-
-    const items = Object.entries(this.graphData.tagColors);
-
-    items.forEach(([tag, color]) => {
-      const item = legend.append('div')
-        .attr('class', 'legend-item');
-
-      item.append('div')
-        .attr('class', 'legend-color')
-        .style('background-color', color);
-
-      item.append('span').text(tag);
-    });
   }
 
   populateTagFilter() {

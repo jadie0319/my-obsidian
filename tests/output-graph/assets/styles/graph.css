@@ -112,40 +112,6 @@
   cursor: pointer;
 }
 
-/* Legend */
-#graph-legend {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 12px;
-  max-width: 200px;
-  max-height: 300px;
-  overflow-y: auto;
-  font-size: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.legend-item:last-child {
-  margin-bottom: 0;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
 /* Graph Elements */
 .graph-link {
   stroke: var(--color-border);
@@ -244,13 +210,6 @@
     min-width: 100%;
   }
 
-  #graph-legend {
-    bottom: 10px;
-    right: 10px;
-    max-width: 150px;
-    font-size: 10px;
-  }
-
   .page-list-section {
     padding: 20px 0;
   }
@@ -262,7 +221,6 @@
     stroke-opacity: 0.4;
   }
 
-  #graph-legend,
   .graph-tooltip,
   .graph-controls input,
   .graph-controls select,
