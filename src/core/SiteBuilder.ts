@@ -78,6 +78,13 @@ export class SiteBuilder {
         const indexPage = htmlGenerator.generateIndex(generatedPages, processedFiles);
         await FileSystem.writeFile(indexPage.outputPath, indexPage.content);
         logger.success('Index page generated');
+
+        logger.info('Generating tag pages...');
+        const tagPages = htmlGenerator.generateTagPages(generatedPages);
+        for (const tagPage of tagPages) {
+          await FileSystem.writeFile(tagPage.outputPath, tagPage.content);
+        }
+        logger.success(`Generated ${tagPages.length} tag pages`);
       }
 
       if (this.config.features.copyAssets) {

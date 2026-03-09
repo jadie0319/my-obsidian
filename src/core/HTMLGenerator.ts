@@ -77,9 +77,9 @@ export class HTMLGenerator {
   }
 
   generatePage(processedFile: ProcessedFile, outlinks: PageRef[] = [], backlinks: PageRef[] = []): GeneratedPage {
-    const excludedKeys = new Set(['title', 'date', 'tags', 'description']);
+    const allowedKeys = new Set(['created', 'modified']);
     const properties = Object.entries(processedFile.frontmatter)
-      .filter(([key]) => !excludedKeys.has(key))
+      .filter(([key]) => allowedKeys.has(key))
       .map(([key, value]) => ({
         key,
         value: Array.isArray(value) ? value.join(', ') : String(value),
@@ -104,6 +104,53 @@ export class HTMLGenerator {
       title: processedFile.title,
       frontmatter: processedFile.frontmatter,
     };
+  }
+
+  generateTagPages(pages: GeneratedPage[]): GeneratedPage[] {
+    const tagMap = new Map<string, { title: string; url: string; date: string }[]>();
+
+    for (const page of pages) {
+      const tags = (page.frontmatter.tags as string[] | undefined) || [];
+      const relativePath = path.relative(this.config.output, page.outputPath);
+      const url = this.config.basePath + relativePath.split(path.sep).join('/');
+
+      for (const tag of tags) {
+        if (!tagMap.has(tag)) {
+          tagMap.set(tag, []);
+        }
+        tagMap.get(tag)!.push({
+          title: page.title,
+          url,
+          date: String(page.frontmatter.date || ''),
+        });
+      }
+    }
+
+    const tagPages: GeneratedPage[] = [];
+
+    for (const [tag, taggedPages] of tagMap) {
+      const sortedPages = [...taggedPages].sort((a, b) => b.date.localeCompare(a.date));
+
+      const html = this.templateEngine.render('tag', {
+        siteTitle: this.config.site.title,
+        tag,
+        pages: sortedPages,
+        basePath: this.config.basePath,
+        pageCount: sortedPages.length,
+      });
+
+      const tagParts = tag.split('/');
+      const tagOutputPath = path.join(this.config.output, 'tags', ...tagParts, 'index.html');
+
+      tagPages.push({
+        outputPath: tagOutputPath,
+        content: html,
+        title: `Tag: ${tag}`,
+        frontmatter: {},
+      });
+    }
+
+    return tagPages;
   }
 
   generateIndex(pages: GeneratedPage[], processedFiles: ProcessedFile[]): GeneratedPage {

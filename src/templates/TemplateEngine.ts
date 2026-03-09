@@ -23,8 +23,10 @@ export class TemplateEngine {
   async loadDefaultTemplates(templateDir: string): Promise<void> {
     const pageTemplatePath = path.join(templateDir, 'page.html');
     const indexTemplatePath = path.join(templateDir, 'index.html');
+    const tagTemplatePath = path.join(templateDir, 'tag.html');
 
     await this.loadTemplate('page', pageTemplatePath);
     await this.loadTemplate('index', indexTemplatePath);
+    await this.loadTemplate('tag', tagTemplatePath);
   }
 }

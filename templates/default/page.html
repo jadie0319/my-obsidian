@@ -50,7 +50,7 @@
         {{#if tags}}
         <div class="sidebar-tags">
           {{#each tags}}
-          <span class="tag">{{this}}</span>
+          <a href="{{../basePath}}tags/{{this}}/" class="tag">{{this}}</a>
           {{/each}}
         </div>
         {{else}}
