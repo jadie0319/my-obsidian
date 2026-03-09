@@ -20,6 +20,9 @@ class GraphView {
     this.simulation = null;
     this.g = null;
     this.tooltip = null;
+    this.activeTag = '';
+    this.currentZoom = 1;
+    this.nodeLabels = null;
   }
 
   initialize() {
@@ -75,19 +78,30 @@ class GraphView {
       .attr('class', d => `graph-link ${d.type}`)
       .attr('stroke-width', 1.5);
 
-    const node = this.g.append('g')
-      .selectAll('circle')
+    const nodeGroup = this.g.append('g')
+      .attr('class', 'graph-node-groups')
+      .selectAll('g')
       .data(this.filteredData.nodes)
-      .join('circle')
+      .join('g')
+      .attr('class', 'graph-node-group')
+      .call(this.drag(this.simulation));
+
+    const node = nodeGroup.append('circle')
       .attr('class', d => `graph-node ${d.isOrphan ? 'orphan' : ''}`)
       .attr('r', d => d.size)
       .attr('fill', d => this.graphData.tagColors[d.group] || '#6b7280')
-      .call(this.drag(this.simulation))
       .on('click', (event, d) => {
         window.location.href = d.url;
       })
       .on('mouseover', (event, d) => this.showTooltip(event, d))
       .on('mouseout', () => this.hideTooltip());
+
+    this.nodeLabels = nodeGroup.append('text')
+      .attr('class', 'graph-node-label')
+      .attr('text-anchor', 'middle')
+      .attr('dy', d => d.size + 14);
+
+    this.updateNodeLabels();
 
     this.simulation.on('tick', () => {
       link
@@ -96,10 +110,53 @@ class GraphView {
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
 
-      node
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y);
+      nodeGroup
+        .attr('transform', d => `translate(${d.x}, ${d.y})`);
     });
+  }
+
+  truncateLabel(title, maxLength = 10) {
+    const chars = Array.from(title || '');
+    if (chars.length <= maxLength) {
+      return title;
+    }
+
+    return `${chars.slice(0, maxLength - 1).join('')}…`;
+  }
+
+  getLabelMaxLength() {
+    if (this.currentZoom >= 2.4) {
+      return Infinity;
+    }
+
+    if (this.currentZoom >= 1.5) {
+      return 18;
+    }
+
+    if (this.currentZoom >= 0.75) {
+      return 10;
+    }
+
+    return 0;
+  }
+
+  updateNodeLabels() {
+    if (!this.nodeLabels) {
+      return;
+    }
+
+    const maxLength = this.getLabelMaxLength();
+    this.nodeLabels
+      .style('display', maxLength === 0 ? 'none' : null)
+      .text(d => {
+        if (maxLength === 0) {
+          return '';
+        }
+
+        return Number.isFinite(maxLength)
+          ? this.truncateLabel(d.title, maxLength)
+          : d.title;
+      });
   }
 
   drag(simulation) {
@@ -130,7 +187,9 @@ class GraphView {
     const zoom = d3.zoom()
       .scaleExtent([0.1, 4])
       .on('zoom', (event) => {
+        this.currentZoom = event.transform.k;
         this.g.attr('transform', event.transform);
+        this.updateNodeLabels();
       });
 
     this.svg.call(zoom);
@@ -215,11 +274,72 @@ class GraphView {
       .filter(tag => tag !== 'untagged')
       .sort();
 
+    tagFilter.innerHTML = '<option value="">All tags</option>';
+
     tags.forEach(tag => {
       const option = document.createElement('option');
       option.value = tag;
       option.textContent = tag;
       tagFilter.appendChild(option);
+    });
+  }
+
+  populateTagLegend() {
+    const container = document.getElementById('graph-tag-legend');
+    if (!container) {
+      return;
+    }
+
+    const tagCounts = new Map();
+    this.graphData.nodes.forEach(node => {
+      node.tags.forEach(tag => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    });
+
+    const tags = Array.from(tagCounts.keys()).sort();
+    if (tags.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = tags.map(tag => `
+      <button class="graph-tag-chip" data-tag="${tag}" type="button">
+        <span class="graph-tag-chip-dot" style="background:${this.graphData.tagColors[tag] || '#6b7280'}"></span>
+        <span>#${tag}</span>
+        <span class="graph-tag-chip-count">${tagCounts.get(tag)}</span>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.graph-tag-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const nextTag = this.activeTag === chip.dataset.tag ? '' : chip.dataset.tag;
+        this.activeTag = nextTag;
+
+        const tagFilter = document.getElementById('tag-filter');
+        const searchInput = document.getElementById('search-input');
+        const showOrphansCheckbox = document.getElementById('show-orphans-only');
+
+        if (tagFilter) {
+          tagFilter.value = nextTag;
+        }
+
+        this.updateTagLegendState();
+        this.filter(
+          searchInput ? searchInput.value : '',
+          nextTag,
+          showOrphansCheckbox ? showOrphansCheckbox.checked : false
+        );
+      });
+    });
+
+    this.updateTagLegendState();
+  }
+
+  updateTagLegendState() {
+    const chips = document.querySelectorAll('.graph-tag-chip');
+    chips.forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.tag === this.activeTag);
     });
   }
 }
@@ -243,6 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   graphView.initialize();
   graphView.populateTagFilter();
+  graphView.populateTagLegend();
 
   window.graphView = graphView;
 
@@ -264,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   tagFilter.addEventListener('change', (e) => {
+    graphView.activeTag = e.target.value;
+    graphView.updateTagLegendState();
     graphView.filter(
       searchInput.value,
       e.target.value,
@@ -283,6 +406,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.value = '';
     tagFilter.value = '';
     showOrphansCheckbox.checked = false;
+    graphView.activeTag = '';
+    graphView.updateTagLegendState();
     graphView.reset();
   });
 

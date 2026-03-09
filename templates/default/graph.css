@@ -114,6 +114,49 @@
   cursor: pointer;
 }
 
+.graph-tag-legend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 320px;
+}
+
+.graph-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  color: var(--color-text);
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.graph-tag-chip.active {
+  border-color: var(--color-link);
+  color: var(--color-link);
+}
+
+.graph-tag-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.graph-tag-chip-count {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
 /* Graph Elements */
 .graph-link {
   stroke: var(--color-border);
@@ -148,6 +191,17 @@
 .graph-node.highlighted {
   stroke: var(--color-text);
   stroke-width: 3px;
+}
+
+.graph-node-label {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--color-text);
+  paint-order: stroke;
+  stroke: var(--color-bg);
+  stroke-width: 4px;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Tooltip */
@@ -206,6 +260,13 @@
     max-width: none;
     left: 10px;
     right: 10px;
+  }
+
+  .graph-tag-legend {
+    position: static;
+    justify-content: flex-start;
+    max-width: none;
+    padding: 88px 10px 0;
   }
 
   .graph-controls input[type="text"] {
