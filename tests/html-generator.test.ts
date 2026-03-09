@@ -60,7 +60,40 @@ describe('HTMLGenerator', () => {
     expect(page.content).toContain('href="/project-site/assets/styles/main.css"');
     expect(index.content).toContain('href="/project-site/assets/styles/graph.css"');
     expect(index.content).toContain('src="/project-site/assets/scripts/graph.js"');
-    expect(index.content).toContain('href="/project-site/readme.html"');
     expect(index.content).toContain('"url":"/project-site/readme.html"');
+  });
+
+  it('generates flat tag pages and links for normalized tags', async () => {
+    const config = createConfig('/project-site/');
+    const generator = new HTMLGenerator(config);
+
+    await generator.initialize();
+
+    const processedFile: ProcessedFile = {
+      ...createProcessedFile('README', path.join(config.output, 'readme.html')),
+      frontmatter: {
+        description: 'README description',
+        date: '2026-03-09',
+        tags: ['ai', 'coding'],
+      },
+    };
+
+    const page = generator.generatePage(processedFile);
+    const tagPages = generator.generateTagPages([page]);
+    const index = generator.generateIndex([page], [processedFile]);
+
+    expect(page.content).toContain('href="/project-site/tags/ai/" class="tag"');
+    expect(page.content).toContain('href="/project-site/tags/coding/" class="tag"');
+
+    expect(tagPages).toHaveLength(2);
+    expect(tagPages.map(tagPage => tagPage.outputPath)).toEqual(
+      expect.arrayContaining([
+        path.join(config.output, 'tags', 'ai', 'index.html'),
+        path.join(config.output, 'tags', 'coding', 'index.html'),
+      ])
+    );
+
+    expect(index.content).toContain("var url = basePath + 'tags/' + tag + '/';");
+    expect(index.content).not.toContain("tag.split('/')");
   });
 });

@@ -16,6 +16,7 @@ import path from 'path';
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Root } from 'mdast';
+import { normalizeTags } from '../utils/Tags';
 
 export class MarkdownProcessor {
   private config: ObsidianConfig;
@@ -39,6 +40,7 @@ export class MarkdownProcessor {
     if (!frontmatter.modified && file.modifiedAt) {
       frontmatter.modified = file.modifiedAt.toISOString().split('T')[0];
     }
+    frontmatter.tags = normalizeTags(frontmatter.tags);
 
     const title = FrontMatterParser.extractTitle(frontmatter, markdownContent, file.basename);
     const slug = PathResolver.slugify(file.basename);

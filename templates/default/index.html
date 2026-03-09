@@ -63,14 +63,11 @@
       var basePath = '{{basePath}}';
       var data = JSON.parse(document.getElementById('graph-data').textContent);
 
-      // Collect flat tag list with counts, splitting by '/'
+      // Collect flat tag list with counts from normalized tags
       var tagCounts = {};
       data.nodes.forEach(function(n) {
         (n.tags || []).forEach(function(tag) {
-          tag.split('/').forEach(function(part) {
-            var t = part.trim();
-            if (t) tagCounts[t] = (tagCounts[t] || 0) + 1;
-          });
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
         });
       });
 
