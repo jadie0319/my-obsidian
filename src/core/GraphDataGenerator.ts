@@ -1,7 +1,6 @@
 import { ProcessedFile } from '../types/ParsedContent';
 import { GraphData, GraphNode, GraphEdge } from '../types/GraphData';
 import { ObsidianConfig } from '../types/Config';
-import { PathResolver } from '../utils/PathResolver';
 import path from 'path';
 
 const TAG_COLOR_PALETTE = [
@@ -156,8 +155,8 @@ export class GraphDataGenerator {
 
     for (const node of nodes) {
       const totalLinks = linkCounts.get(node.id) || 0;
-      node.size = Math.sqrt(totalLinks) * 5 + 5;
-      node.size = Math.min(node.size, 30);
+      node.size = Math.sqrt(totalLinks) * 6 + 8;
+      node.size = Math.min(node.size, 38);
     }
   }
 

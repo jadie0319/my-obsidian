@@ -7,7 +7,7 @@ export class PathResolver {
       .trim()
       .replace(/\s+/g, '-')
       .replace(/[^\w\-가-힣]/g, '')
-      .replace(/\-\-+/g, '-')
+      .replace(/--+/g, '-')
       .replace(/^-+/, '')
       .replace(/-+$/, '');
   }
@@ -34,7 +34,7 @@ export class PathResolver {
   }
 
   static resolveWikiLink(linkText: string, permalinkMap: Map<string, string>): string | null {
-    const cleanLink = linkText.replace(/[\[\]]/g, '');
+    const cleanLink = linkText.replace(/[[\]]/g, '');
     const [target] = cleanLink.split('|');
     const trimmedTarget = target.trim();
 

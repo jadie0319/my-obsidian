@@ -10,7 +10,7 @@ export class WikiLinkResolver {
   }
 
   resolve(wikiLink: string): { url: string | null; alias: string | null } {
-    const cleanLink = wikiLink.replace(/[\[\]]/g, '');
+    const cleanLink = wikiLink.replace(/[[\]]/g, '');
     const [target, alias] = cleanLink.split('|').map(s => s.trim());
 
     const url = this.findTarget(target);

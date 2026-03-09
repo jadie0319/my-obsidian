@@ -56,10 +56,13 @@ export class SiteBuilder {
       const htmlGenerator = new HTMLGenerator(this.config);
       await htmlGenerator.initialize();
 
+      const linkMaps = htmlGenerator.buildLinkMaps(processedFiles);
+
       const generatedPages = [];
       for (const processed of processedFiles) {
         try {
-          const page = htmlGenerator.generatePage(processed);
+          const linkData = linkMaps.get(processed.slug) || { outlinks: [], backlinks: [] };
+          const page = htmlGenerator.generatePage(processed, linkData.outlinks, linkData.backlinks);
           await FileSystem.writeFile(page.outputPath, page.content);
           generatedPages.push(page);
         } catch (error) {

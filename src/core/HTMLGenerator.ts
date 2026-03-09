@@ -5,6 +5,11 @@ import { registerHelpers } from '../templates/helpers';
 import { GraphDataGenerator } from './GraphDataGenerator';
 import path from 'path';
 
+export interface PageRef {
+  title: string;
+  url: string;
+}
+
 export class HTMLGenerator {
   private config: ObsidianConfig;
   private templateEngine: TemplateEngine;
@@ -20,7 +25,66 @@ export class HTMLGenerator {
     await this.templateEngine.loadDefaultTemplates(templateDir);
   }
 
-  generatePage(processedFile: ProcessedFile): GeneratedPage {
+  buildLinkMaps(processedFiles: ProcessedFile[]): Map<string, { outlinks: PageRef[]; backlinks: PageRef[] }> {
+    type PageInfo = { title: string; url: string; slug: string };
+    const nameToPage = new Map<string, PageInfo>();
+
+    for (const file of processedFiles) {
+      const relativePath = path.relative(this.config.output, file.outputPath);
+      const url = this.config.basePath + relativePath.split(path.sep).join('/');
+      const basename = path.basename(file.sourcePath, '.md');
+      const pageInfo: PageInfo = { title: file.title, url, slug: file.slug };
+
+      nameToPage.set(basename, pageInfo);
+      nameToPage.set(basename.toLowerCase(), pageInfo);
+      nameToPage.set(file.slug, pageInfo);
+      const pathWithoutExt = file.sourcePath.replace(/\.md$/, '');
+      nameToPage.set(pathWithoutExt, pageInfo);
+      nameToPage.set(pathWithoutExt.toLowerCase(), pageInfo);
+    }
+
+    const result = new Map<string, { outlinks: PageRef[]; backlinks: PageRef[] }>();
+    for (const file of processedFiles) {
+      result.set(file.slug, { outlinks: [], backlinks: [] });
+    }
+
+    for (const file of processedFiles) {
+      const relativePath = path.relative(this.config.output, file.outputPath);
+      const fileUrl = this.config.basePath + relativePath.split(path.sep).join('/');
+      const fileRef: PageRef = { title: file.title, url: fileUrl };
+      const seenTargets = new Set<string>();
+
+      for (const linkText of file.links) {
+        let target = nameToPage.get(linkText) || nameToPage.get(linkText.toLowerCase());
+        if (!target) {
+          const lowerLink = linkText.toLowerCase();
+          for (const [key, value] of nameToPage) {
+            if (key.toLowerCase().endsWith(lowerLink)) {
+              target = value;
+              break;
+            }
+          }
+        }
+        if (target && !seenTargets.has(target.slug)) {
+          seenTargets.add(target.slug);
+          result.get(file.slug)!.outlinks.push({ title: target.title, url: target.url });
+          result.get(target.slug)!.backlinks.push(fileRef);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  generatePage(processedFile: ProcessedFile, outlinks: PageRef[] = [], backlinks: PageRef[] = []): GeneratedPage {
+    const excludedKeys = new Set(['title', 'date', 'tags', 'description']);
+    const properties = Object.entries(processedFile.frontmatter)
+      .filter(([key]) => !excludedKeys.has(key))
+      .map(([key, value]) => ({
+        key,
+        value: Array.isArray(value) ? value.join(', ') : String(value),
+      }));
+
     const html = this.templateEngine.render('page', {
       title: processedFile.title,
       siteTitle: this.config.site.title,
@@ -29,6 +93,9 @@ export class HTMLGenerator {
       tags: processedFile.frontmatter.tags,
       content: processedFile.html,
       basePath: this.config.basePath,
+      properties,
+      outlinks,
+      backlinks,
     });
 
     return {

@@ -132,9 +132,6 @@ export class MarkdownProcessor {
   }
 
   private createEmbedPlugin(embeds: string[]): Plugin<[], Root> {
-    const resolver = this.wikiLinkResolver;
-    const outputRoot = this.config.output;
-
     return () => {
       return (tree) => {
         visit(tree, 'text', (node, index, parent) => {
