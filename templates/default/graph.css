@@ -1,0 +1,273 @@
+/* Layout */
+.index-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.graph-section {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  min-height: 600px;
+  background: var(--color-bg);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.page-list-section {
+  flex: 1;
+  padding: 40px 0;
+  background: var(--color-bg);
+}
+
+/* Graph Container */
+#graph-container {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#graph-container:active {
+  cursor: grabbing;
+}
+
+#graph-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Controls */
+.graph-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 600px;
+}
+
+.graph-controls input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.graph-controls input[type="text"]:focus {
+  outline: none;
+  border-color: var(--color-link);
+}
+
+.graph-controls select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.graph-controls select:focus {
+  outline: none;
+  border-color: var(--color-link);
+}
+
+.graph-controls button {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.graph-controls button:hover {
+  background: var(--color-border);
+}
+
+.graph-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.graph-controls input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Legend */
+#graph-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  max-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Graph Elements */
+.graph-link {
+  stroke: var(--color-border);
+  stroke-opacity: 0.6;
+  stroke-width: 1.5px;
+  fill: none;
+}
+
+.graph-link.embed {
+  stroke-dasharray: 4 2;
+}
+
+.graph-node {
+  cursor: pointer;
+  transition: r 0.2s, stroke-width 0.2s;
+  stroke: var(--color-bg);
+  stroke-width: 1px;
+}
+
+.graph-node:hover {
+  stroke: var(--color-text);
+  stroke-width: 2px;
+}
+
+.graph-node.orphan {
+  opacity: 0.5;
+  stroke: var(--color-text-secondary);
+  stroke-width: 1px;
+  stroke-dasharray: 2 2;
+}
+
+.graph-node.highlighted {
+  stroke: var(--color-text);
+  stroke-width: 3px;
+}
+
+/* Tooltip */
+.graph-tooltip {
+  position: absolute;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 250px;
+}
+
+.graph-tooltip.visible {
+  opacity: 1;
+}
+
+.graph-tooltip h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.graph-tooltip .tooltip-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.graph-tooltip .tooltip-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--color-border);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--color-text);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .graph-section {
+    height: 50vh;
+    min-height: 400px;
+  }
+
+  .graph-controls {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: none;
+    left: 10px;
+    right: 10px;
+  }
+
+  .graph-controls input[type="text"] {
+    min-width: 100%;
+  }
+
+  #graph-legend {
+    bottom: 10px;
+    right: 10px;
+    max-width: 150px;
+    font-size: 10px;
+  }
+
+  .page-list-section {
+    padding: 20px 0;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .graph-link {
+    stroke-opacity: 0.4;
+  }
+
+  #graph-legend,
+  .graph-tooltip,
+  .graph-controls input,
+  .graph-controls select,
+  .graph-controls button,
+  .graph-controls label {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "my-obsidian",
+  "version": "1.0.0",
+  "description": "Convert Obsidian vault to GitHub Pages static site",
+  "main": "dist/index.js",
+  "bin": {
+    "my-obsidian": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/cli/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "obsidian",
+    "static-site-generator",
+    "github-pages",
+    "markdown",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "commander": "^12.0.0",
+    "unified": "^11.0.4",
+    "remark-parse": "^11.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-rehype": "^11.0.0",
+    "rehype-stringify": "^10.0.0",
+    "rehype-highlight": "^7.0.0",
+    "unist-util-visit": "^5.0.0",
+    "@portaljs/remark-wiki-link": "^1.0.6",
+    "gray-matter": "^4.0.3",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "handlebars": "^4.7.8",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/mdast": "^4.0.3",
+    "tsx": "^4.7.1",
+    "vitest": "^1.4.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0"
+  }
+}
