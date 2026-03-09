@@ -32,7 +32,7 @@ my-obsidian build --source ./vault --output ./dist
 my-obsidian build [options]
 
 Options:
-  -s, --source <path>        Source vault directory (required)
+  -s, --source <path>        Source vault directory
   -o, --output <path>        Output directory (default: "./dist")
   -e, --exclude <patterns>   Exclude directories/files
   -c, --config <path>        Configuration file
@@ -78,6 +78,8 @@ my-obsidian init
 ```bash
 my-obsidian build --config obsidian.config.json
 ```
+
+이 경우 `obsidian.config.json` 안에 `source`가 포함되어 있어야 합니다. `--source`를 함께 지정하면 설정 파일의 값을 덮어씁니다.
 
 ## GitHub Pages 배포
 

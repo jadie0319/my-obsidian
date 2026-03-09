@@ -1,6 +1,7 @@
 import { ConfigSchema, ObsidianConfig, CLIOptions } from '../types/Config';
 import { FileSystem } from './FileSystem';
 import { logger } from './Logger';
+import { ZodError } from 'zod';
 
 export class ConfigManager {
   static async loadConfig(configPath?: string, cliOptions?: CLIOptions): Promise<ObsidianConfig> {
@@ -25,6 +26,15 @@ export class ConfigManager {
       return ConfigSchema.parse(mergedConfig);
     } catch (error) {
       logger.error('Configuration validation failed', error as Error);
+      if (error instanceof ZodError) {
+        const isSourceMissing = error.issues.some(issue => issue.path[0] === 'source');
+        if (isSourceMissing) {
+          throw new Error(
+            'Invalid configuration: source is required. Provide it with --source or in your config file.'
+          );
+        }
+      }
+
       throw new Error('Invalid configuration. Please check your config file and CLI options.');
     }
   }
