@@ -20,6 +20,8 @@ class GraphView {
     this.simulation = null;
     this.g = null;
     this.tooltip = null;
+    this.currentZoom = 1;
+    this.nodeLabels = null;
   }
 
   initialize() {
@@ -34,7 +36,10 @@ class GraphView {
     this.svg = this.container
       .append('svg')
       .attr('width', this.options.width)
-      .attr('height', this.options.height);
+      .attr('height', this.options.height)
+      .attr('viewBox', `0 0 ${this.options.width} ${this.options.height}`)
+      .style('width', '100%')
+      .style('height', '100%');
 
     this.g = this.svg.append('g');
   }
@@ -72,19 +77,30 @@ class GraphView {
       .attr('class', d => `graph-link ${d.type}`)
       .attr('stroke-width', 1.5);
 
-    const node = this.g.append('g')
-      .selectAll('circle')
+    const nodeGroup = this.g.append('g')
+      .attr('class', 'graph-node-groups')
+      .selectAll('g')
       .data(this.filteredData.nodes)
-      .join('circle')
+      .join('g')
+      .attr('class', 'graph-node-group')
+      .call(this.drag(this.simulation));
+
+    const node = nodeGroup.append('circle')
       .attr('class', d => `graph-node ${d.isOrphan ? 'orphan' : ''}`)
       .attr('r', d => d.size)
       .attr('fill', d => this.graphData.tagColors[d.group] || '#6b7280')
-      .call(this.drag(this.simulation))
       .on('click', (event, d) => {
         window.location.href = d.url;
       })
       .on('mouseover', (event, d) => this.showTooltip(event, d))
       .on('mouseout', () => this.hideTooltip());
+
+    this.nodeLabels = nodeGroup.append('text')
+      .attr('class', 'graph-node-label')
+      .attr('text-anchor', 'middle')
+      .attr('dy', d => d.size + 14);
+
+    this.updateNodeLabels();
 
     this.simulation.on('tick', () => {
       link
@@ -93,10 +109,53 @@ class GraphView {
         .attr('x2', d => d.target.x)
         .attr('y2', d => d.target.y);
 
-      node
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y);
+      nodeGroup
+        .attr('transform', d => `translate(${d.x}, ${d.y})`);
     });
+  }
+
+  truncateLabel(title, maxLength = 10) {
+    const chars = Array.from(title || '');
+    if (chars.length <= maxLength) {
+      return title;
+    }
+
+    return `${chars.slice(0, maxLength - 1).join('')}…`;
+  }
+
+  getLabelMaxLength() {
+    if (this.currentZoom >= 1.2) {
+      return Infinity;
+    }
+
+    if (this.currentZoom >= 0.75) {
+      return 18;
+    }
+
+    if (this.currentZoom >= 0.375) {
+      return 10;
+    }
+
+    return 0;
+  }
+
+  updateNodeLabels() {
+    if (!this.nodeLabels) {
+      return;
+    }
+
+    const maxLength = this.getLabelMaxLength();
+    this.nodeLabels
+      .style('display', maxLength === 0 ? 'none' : null)
+      .text(d => {
+        if (maxLength === 0) {
+          return '';
+        }
+
+        return Number.isFinite(maxLength)
+          ? this.truncateLabel(d.title, maxLength)
+          : d.title;
+      });
   }
 
   drag(simulation) {
@@ -127,7 +186,9 @@ class GraphView {
     const zoom = d3.zoom()
       .scaleExtent([0.1, 4])
       .on('zoom', (event) => {
+        this.currentZoom = event.transform.k;
         this.g.attr('transform', event.transform);
+        this.updateNodeLabels();
       });
 
     this.svg.call(zoom);
@@ -212,12 +273,54 @@ class GraphView {
       .filter(tag => tag !== 'untagged')
       .sort();
 
+    tagFilter.innerHTML = '<option value="">All tags</option>';
+
     tags.forEach(tag => {
       const option = document.createElement('option');
       option.value = tag;
       option.textContent = tag;
       tagFilter.appendChild(option);
     });
+  }
+
+  populateTagLegend() {
+    const container = document.getElementById('graph-tag-legend');
+    if (!container) {
+      return;
+    }
+
+    const tagCounts = new Map();
+    this.graphData.nodes.forEach(node => {
+      node.tags.forEach(tag => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      });
+    });
+
+    const tags = Array.from(tagCounts.entries())
+      .sort((a, b) => {
+        if (b[1] !== a[1]) {
+          return b[1] - a[1];
+        }
+
+        return a[0].localeCompare(b[0]);
+      })
+      .slice(0, 7);
+
+    if (tags.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="graph-tag-legend-title">Top tags</div>
+      ${tags.map(([tag, count]) => `
+        <div class="graph-tag-item">
+          <span class="graph-tag-item-dot" style="background:${this.graphData.tagColors[tag] || '#6b7280'}"></span>
+          <span class="graph-tag-item-name">#${tag}</span>
+          <span class="graph-tag-item-count">${count}</span>
+        </div>
+      `).join('')}
+    `;
   }
 }
 
@@ -230,13 +333,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const graphData = JSON.parse(graphDataElement.textContent);
 
+  const containerEl = document.getElementById('graph-container');
+  const containerWidth = containerEl ? (containerEl.clientWidth || containerEl.offsetWidth) : window.innerWidth;
+
   const graphView = new GraphView('graph-container', graphData, {
-    width: window.innerWidth,
+    width: containerWidth,
     height: Math.max(600, window.innerHeight * 0.7)
   });
 
   graphView.initialize();
   graphView.populateTagFilter();
+  graphView.populateTagLegend();
 
   window.graphView = graphView;
 
@@ -281,7 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('resize', () => {
-    const newWidth = window.innerWidth;
+    const resizeContainer = document.getElementById('graph-container');
+    const newWidth = resizeContainer ? (resizeContainer.clientWidth || resizeContainer.offsetWidth) : window.innerWidth;
     const newHeight = Math.max(600, window.innerHeight * 0.7);
 
     graphView.options.width = newWidth;
@@ -289,7 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     graphView.svg
       .attr('width', newWidth)
-      .attr('height', newHeight);
+      .attr('height', newHeight)
+      .attr('viewBox', `0 0 ${newWidth} ${newHeight}`);
 
     graphView.simulation
       .force('center', d3.forceCenter(newWidth / 2, newHeight / 2))

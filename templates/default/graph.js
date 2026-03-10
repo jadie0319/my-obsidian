@@ -124,15 +124,15 @@ class GraphView {
   }
 
   getLabelMaxLength() {
-    if (this.currentZoom >= 2.4) {
+    if (this.currentZoom >= 1.2) {
       return Infinity;
     }
 
-    if (this.currentZoom >= 1.5) {
+    if (this.currentZoom >= 0.75) {
       return 18;
     }
 
-    if (this.currentZoom >= 0.75) {
+    if (this.currentZoom >= 0.375) {
       return 10;
     }
 
