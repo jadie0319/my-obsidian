@@ -15,7 +15,7 @@ import { ObsidianConfig } from '../types/Config';
 import path from 'path';
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
-import type { Root } from 'mdast';
+import type { Root, Image } from 'mdast';
 import { normalizeTags } from '../utils/Tags';
 
 export class MarkdownProcessor {
@@ -55,6 +55,7 @@ export class MarkdownProcessor {
 
     const remarkWikiLinkPlugin = this.createWikiLinkPlugin(links);
     const remarkEmbedPlugin = this.createEmbedPlugin(embeds);
+    const remarkImagePathPlugin = this.createImagePathPlugin();
 
     const processor = unified()
       .use(remarkParse)
@@ -62,6 +63,7 @@ export class MarkdownProcessor {
       .use(remarkFrontmatter, ['yaml'])
       .use(remarkWikiLinkPlugin)
       .use(remarkEmbedPlugin)
+      .use(remarkImagePathPlugin)
       .use(remarkCallout)
       .use(remarkRehype, { allowDangerousHtml: true })
       .use(rehypeHighlight)
@@ -162,7 +164,7 @@ export class MarkdownProcessor {
               });
             }
 
-            const imagePath = `${this.config.basePath}assets/images/${PathResolver.slugify(path.parse(embedText).name)}${path.extname(embedText)}`;
+            const imagePath = `${this.config.basePath}assets/attachments/${PathResolver.slugify(path.parse(embedText).name)}${path.extname(embedText)}`;
             embeds.push(embedText);
 
             newNodes.push({
@@ -184,6 +186,22 @@ export class MarkdownProcessor {
           if (newNodes.length > 0) {
             parent.children.splice(index, 1, ...newNodes);
           }
+        });
+      };
+    };
+  }
+
+  private createImagePathPlugin(): Plugin<[], Root> {
+    const basePath = this.config.basePath;
+
+    return () => {
+      return (tree) => {
+        visit(tree, 'image', (node: Image) => {
+          if (node.url.startsWith('http://') || node.url.startsWith('https://')) return;
+
+          const parsed = path.parse(node.url);
+          const slugified = PathResolver.slugify(parsed.name);
+          node.url = `${basePath}assets/attachments/${slugified}${parsed.ext}`;
         });
       };
     };

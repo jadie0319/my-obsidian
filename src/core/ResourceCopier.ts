@@ -42,7 +42,7 @@ export class ResourceCopier {
     let destPath: string;
 
     if (resource.type === 'image') {
-      destPath = path.join(this.outputRoot, 'assets', 'images', fileName);
+      destPath = path.join(this.outputRoot, 'assets', 'attachments', fileName);
     } else {
       destPath = path.join(this.outputRoot, 'assets', 'attachments', fileName);
     }
