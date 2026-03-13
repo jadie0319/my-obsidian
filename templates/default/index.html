@@ -40,6 +40,11 @@
     <section class="page-list-section">
       <div class="container">
         <main>
+          <section class="recent-uploads">
+            <h2>Recent Uploads</h2>
+            <div id="recent-uploads-container"></div>
+          </section>
+
           <section class="tag-list">
             <h2>Tags</h2>
             <div id="tag-tree-container"></div>
@@ -86,6 +91,18 @@
 
       var container = document.getElementById('tag-tree-container');
       container.innerHTML = html;
+
+      // Render recent uploads
+      var recentPages = {{{recentPages}}};
+      var recentHtml = '<div class="recent-uploads-grid">';
+      recentPages.forEach(function(page, i) {
+        recentHtml += '<a href="' + page.url + '" class="recent-upload-btn">'
+          + '<span class="recent-upload-num">' + (i + 1) + '</span>'
+          + '<span class="recent-upload-title">' + page.title + '</span>'
+          + '</a>';
+      });
+      recentHtml += '</div>';
+      document.getElementById('recent-uploads-container').innerHTML = recentHtml;
     })();
   </script>
 </body>

@@ -181,6 +181,7 @@ export class HTMLGenerator {
       pages: pageList,
       basePath: this.config.basePath,
       graphData: JSON.stringify(graphData),
+      recentPages: JSON.stringify(pageList.slice(0, 10)),
     });
 
     return {
