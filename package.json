@@ -1,6 +1,6 @@
 {
   "name": "my-obsidian",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Convert Obsidian vault to GitHub Pages static site",
   "main": "dist/index.js",
   "bin": {
