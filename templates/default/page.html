@@ -17,6 +17,8 @@
   </nav>
 
   <div class="page-layout">
+    <nav class="page-toc" id="page-toc"></nav>
+
     <main class="page-content">
       <article>
         <h1>{{title}}</h1>
@@ -96,6 +98,46 @@
     <img class="lightbox-img" src="" alt="">
     <p class="lightbox-caption"></p>
   </div>
+
+  <script>
+    // TOC generation
+    (function() {
+      const headings = document.querySelectorAll('.content h1, .content h2, .content h3');
+      headings.forEach((h, i) => {
+        if (!h.id) h.id = 'heading-' + i;
+      });
+
+      const toc = document.getElementById('page-toc');
+      if (headings.length > 1) {
+        const title = document.createElement('div');
+        title.className = 'toc-title';
+        title.textContent = 'Contents';
+        toc.appendChild(title);
+
+        const ul = document.createElement('ul');
+        ul.className = 'toc-list';
+        headings.forEach(h => {
+          const li = document.createElement('li');
+          li.className = 'toc-item toc-' + h.tagName.toLowerCase();
+          const a = document.createElement('a');
+          a.href = '#' + h.id;
+          a.textContent = h.textContent;
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+        toc.appendChild(ul);
+
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            const id = e.target.id;
+            const link = toc.querySelector(`a[href="#${id}"]`);
+            if (link) link.classList.toggle('active', e.isIntersecting);
+          });
+        }, { rootMargin: '-68px 0px -80% 0px' });
+        headings.forEach(h => observer.observe(h));
+      }
+    })();
+  </script>
 
   <script>
     const lightbox = document.getElementById('lightbox');
