@@ -38,14 +38,26 @@ export const remarkCallout: Plugin<[], Root> = () => {
       const isCollapsible = modifier === '+' || modifier === '-';
       const isOpen = modifier === '+';
 
-      // Title text: whatever remains on the first line after removing the marker
+      // Remove the marker from the text node
       firstText.value = firstText.value.replace(match[0], '');
-      const titleText = firstText.value.trim();
 
-      // Remove the first text node (or entire first paragraph) since we handle it as <summary>
+      let titleText = '';
+
       if (isCollapsible) {
-        // Always remove the first paragraph — it becomes the <summary>
-        node.children.shift();
+        // Split on the first newline: text before = title, text after = body
+        const newlineIdx = firstText.value.indexOf('\n');
+        if (newlineIdx !== -1) {
+          titleText = firstText.value.slice(0, newlineIdx).trim();
+          // Keep the remainder as body content in the first paragraph
+          firstText.value = firstText.value.slice(newlineIdx + 1);
+          if (firstText.value === '') {
+            firstChild.children.shift();
+          }
+        } else {
+          // Entire first paragraph is just the title line — remove it
+          titleText = firstText.value.trim();
+          node.children.shift();
+        }
       } else {
         if (firstText.value === '') {
           firstChild.children.shift();
