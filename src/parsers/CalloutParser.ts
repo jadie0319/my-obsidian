@@ -29,26 +29,53 @@ export const remarkCallout: Plugin<[], Root> = () => {
       const firstText = firstChild.children[0];
       if (firstText?.type !== 'text') return;
 
-      const match = firstText.value.match(/^\[!(\w+)\]\s*/);
+      const match = firstText.value.match(/^\[!(\w+)\]([+-]?)\s*/);
       if (!match) return;
 
       const calloutType = match[1].toLowerCase();
+      const modifier = match[2]; // '', '+', or '-'
       const color = calloutTypes[calloutType] || 'blue';
+      const isCollapsible = modifier === '+' || modifier === '-';
+      const isOpen = modifier === '+';
 
+      // Title text: whatever remains on the first line after removing the marker
       firstText.value = firstText.value.replace(match[0], '');
-      if (firstText.value === '') {
-        firstChild.children.shift();
+      const titleText = firstText.value.trim();
+
+      // Remove the first text node (or entire first paragraph) since we handle it as <summary>
+      if (isCollapsible) {
+        // Always remove the first paragraph — it becomes the <summary>
+        node.children.shift();
+      } else {
+        if (firstText.value === '') {
+          firstChild.children.shift();
+        }
       }
 
-      const htmlNode: BlockContent = {
-        type: 'html' as const,
-        value: `<div class="callout callout-${calloutType}" style="border-left: 4px solid var(--callout-${color});">`,
-      };
+      let htmlNode: BlockContent;
+      let closingNode: BlockContent;
 
-      const closingNode: BlockContent = {
-        type: 'html' as const,
-        value: '</div>',
-      };
+      if (isCollapsible) {
+        const openAttr = isOpen ? ' open' : '';
+        const displayTitle = titleText || calloutType.charAt(0).toUpperCase() + calloutType.slice(1);
+        htmlNode = {
+          type: 'html' as const,
+          value: `<details class="callout callout-${calloutType}" style="border-left: 4px solid var(--callout-${color});"${openAttr}><summary class="callout-title">${displayTitle}</summary><div class="callout-body">`,
+        };
+        closingNode = {
+          type: 'html' as const,
+          value: '</div></details>',
+        };
+      } else {
+        htmlNode = {
+          type: 'html' as const,
+          value: `<div class="callout callout-${calloutType}" style="border-left: 4px solid var(--callout-${color});">`,
+        };
+        closingNode = {
+          type: 'html' as const,
+          value: '</div>',
+        };
+      }
 
       parent.children.splice(index, 1, htmlNode, ...node.children, closingNode);
     });
