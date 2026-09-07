@@ -146,7 +146,7 @@ export class Publishing {
       intro: `<header class="garden-intro"><h1>${escape(this.config.site.title)}</h1><p>${escape(this.config.site.description)}</p></header>`,
       recent: `<section><h2>${this.t('Recent uploads', '최근 글')}</h2><ol class="garden-cards">${this.cards(this.entries.slice(0, 10))}</ol><a href="${escape(this.config.basePath)}archive.html">${this.t('View all posts', '전체 글 보기')} →</a></section>`,
       topics: `<section><h2>${this.t('Topics', '주제')}</h2><div class="garden-topics">${tags.map(tag => `<a href="${escape(this.config.basePath)}tags/${escape(tag)}/">#${escape(tag)} (${this.entries.filter(entry => entry.tags.includes(tag)).length})</a>`).join('')}</div></section>`,
-      graph: `<section class="garden-global"><h2>${this.t('Explore the graph', '글 연결 그래프')}</h2>${$.html(graph)}</section>`,
+      graph: `<section class="garden-global">${$.html(graph)}</section>`,
     };
     $('.index-layout').html(`<main class="garden-home">${[...new Set(this.options.homeOrder)].map(key => sections[key]).join('')}</main>`);
     return { ...page, content: $.html() };
