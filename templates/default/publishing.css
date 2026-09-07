@@ -19,7 +19,7 @@
 .garden-card small, .garden-meta { color: var(--color-text-secondary); }
 .garden-topics { display: flex; flex-wrap: wrap; gap: 12px; }
 .garden-global summary, .mobile-toc summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
-.garden-global .graph-section { width: 100%; }
+.garden-global .graph-section { width: 100%; max-width: none; }
 .archive-controls { display: flex; flex-wrap: wrap; gap: 24px; }
 .archive-controls label { display: flex; align-items: center; gap: 10px; }
 .garden-series { margin: 40px 0; padding: 20px; border: 1px solid var(--color-border); border-radius: 8px; }
