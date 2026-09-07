@@ -44,12 +44,13 @@ export class MarkdownProcessor {
     frontmatter.tags = normalizeTags(frontmatter.tags);
 
     const title = FrontMatterParser.extractTitle(frontmatter, markdownContent, file.basename);
-    const slug = PathResolver.slugify(file.basename);
-    const outputPath = PathResolver.toOutputPath(
+    const outputPath = PathResolver.noteOutputPath(
       file.absolutePath,
       this.config.source,
-      this.config.output
+      this.config.output,
+      frontmatter.permalink
     );
+    const slug = path.relative(this.config.output, outputPath).split(path.sep).join('/').replace(/\.html$/, '');
 
     const links: string[] = [];
     const embeds: string[] = [];
@@ -93,7 +94,7 @@ export class MarkdownProcessor {
         visit(tree, 'text', (node, index, parent) => {
           if (!parent || index === undefined) return;
 
-          const wikiLinkRegex = /\[\[([^\]]+)\]\]/g;
+          const wikiLinkRegex = /(?<!!)\[\[([^\]]+)\]\]/g;
           let match;
           const newNodes = [];
           let lastIndex = 0;

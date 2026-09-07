@@ -3,6 +3,8 @@ export interface FrontMatter {
   date?: string;
   tags?: string[];
   description?: string;
+  permalink?: string;
+  redirectFrom?: string[];
   [key: string]: unknown;
 }
 

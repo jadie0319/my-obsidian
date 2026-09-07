@@ -1,6 +1,7 @@
 import { VaultFile } from '../types/VaultFile';
 import { PathResolver } from '../utils/PathResolver';
 import path from 'path';
+import { FrontMatterParser } from './FrontMatterParser';
 
 export class WikiLinkResolver {
   private permalinkMap: Map<string, string>;
@@ -52,7 +53,8 @@ export class WikiLinkResolver {
 
     for (const file of vaultFiles) {
       const filename = path.basename(file.path, '.md');
-      const outputPath = PathResolver.toOutputPath(file.absolutePath, sourceRoot, outputRoot);
+      const { frontmatter } = FrontMatterParser.parse(file.content);
+      const outputPath = PathResolver.noteOutputPath(file.absolutePath, sourceRoot, outputRoot, frontmatter.permalink);
       const urlPath = PathResolver.toUrlPath(outputPath, outputRoot, basePath);
 
       map.set(filename, urlPath);

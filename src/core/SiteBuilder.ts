@@ -12,6 +12,7 @@ import { FrontMatterParser } from '../parsers/FrontMatterParser';
 import { WikiLinkResolver } from '../parsers/WikiLinkParser';
 import { PathResolver } from '../utils/PathResolver';
 import { checkLinks } from './LinkChecker';
+import { planRoutes, redirectPaths } from './PageRoutes';
 
 export class SiteBuilder {
   private config: ObsidianConfig;
@@ -59,6 +60,7 @@ export class SiteBuilder {
       }
 
       logger.succeedSpinner(`Processed ${processedFiles.length} markdown files`);
+      if (errors.length) throw new Error(`Failed to process ${errors.length} notes: ${errors.join('; ')}`);
 
       logger.startSpinner('Generating HTML pages...');
 
@@ -66,14 +68,7 @@ export class SiteBuilder {
       await htmlGenerator.initialize();
       const publishing = new Publishing(this.config, processedFiles);
       const allPages: import('../types/ParsedContent').GeneratedPage[] = [];
-      const destinations = new Set<string>();
-      for (const file of processedFiles) {
-        const relative = path.relative(this.config.output, file.outputPath).split(path.sep).join('/');
-        if (relative === 'archive.html' || relative.startsWith('tags/') || (this.config.features.generateIndex && relative === 'index.html') || destinations.has(relative)) {
-          throw new Error(`Conflicting output path: ${relative}. Rename the source note or folder.`);
-        }
-        destinations.add(relative);
-      }
+      const redirects = planRoutes(processedFiles, this.config);
 
       const linkMaps = htmlGenerator.buildLinkMaps(processedFiles);
 
@@ -92,6 +87,11 @@ export class SiteBuilder {
       }
 
       logger.succeedSpinner(`Generated ${generatedPages.length} HTML pages`);
+      if (errors.length) throw new Error(`Failed to generate ${errors.length} pages: ${errors.join('; ')}`);
+      for (const redirect of redirects) {
+        await FileSystem.writeFile(redirect.outputPath, redirect.content);
+        allPages.push(redirect);
+      }
 
       if (this.config.features.generateIndex) {
         logger.info('Generating index page...');
@@ -120,8 +120,13 @@ export class SiteBuilder {
       const previous: string[] = await FileSystem.exists(manifestPath)
         ? JSON.parse(await FileSystem.readFile(manifestPath)) : [];
       const current = allPages.map(page => path.relative(this.config.output, page.outputPath));
-      const hidden = vaultStructure.markdownFiles.filter(file => !publicFiles.includes(file))
-        .map(file => path.relative(this.config.output, PathResolver.toOutputPath(file.absolutePath, this.config.source, this.config.output)));
+      const hidden = vaultStructure.markdownFiles.filter(file => !publicFiles.includes(file)).flatMap(file => {
+        const { frontmatter } = FrontMatterParser.parse(file.content);
+        return [PathResolver.toOutputPath(file.absolutePath, this.config.source, this.config.output),
+          PathResolver.noteOutputPath(file.absolutePath, this.config.source, this.config.output, frontmatter.permalink),
+          ...redirectPaths(frontmatter.redirectFrom, this.config.output)]
+          .map(outputPath => path.relative(this.config.output, outputPath));
+      });
       for (const relative of new Set([...previous, ...hidden])) {
         const target = path.resolve(this.config.output, relative);
         if (!current.includes(relative) && relative.endsWith('.html') && target.startsWith(path.resolve(this.config.output) + path.sep)) await FileSystem.remove(target);
@@ -172,8 +177,7 @@ export class SiteBuilder {
     const baseUrl = this.config.site.url || '';
 
     const urls = pages.map(page => {
-      const relativePath = path.relative(this.config.output, page.outputPath);
-      const urlPath = relativePath.split(path.sep).join('/');
+      const urlPath = PathResolver.toUrlPath(page.outputPath, this.config.output, '/').slice(1);
       const fullUrl = baseUrl ? new URL(urlPath, baseUrl.replace(/\/$/, '') + '/').href : `${this.config.basePath}${urlPath}`;
       const lastmod = page.frontmatter.date || new Date().toISOString().split('T')[0];
 

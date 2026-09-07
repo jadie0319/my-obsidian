@@ -2,6 +2,7 @@ import { ProcessedFile } from '../types/ParsedContent';
 import { GraphData, GraphNode, GraphEdge } from '../types/GraphData';
 import { ObsidianConfig } from '../types/Config';
 import path from 'path';
+import { PathResolver } from '../utils/PathResolver';
 
 const TAG_COLOR_PALETTE = [
   '#8b5cf6', // purple
@@ -62,10 +63,7 @@ export class GraphDataGenerator {
 
   private createNodes(files: ProcessedFile[]): GraphNode[] {
     return files.map(file => {
-      const relativePath = path.relative(this.config.output, file.outputPath);
-      const relativeUrl = relativePath.split(path.sep).join('/');
-      const basePath = this.config.basePath.endsWith('/') ? this.config.basePath : this.config.basePath + '/';
-      const url = basePath + relativeUrl;
+      const url = PathResolver.toUrlPath(file.outputPath, this.config.output, this.config.basePath);
 
       const tags = file.frontmatter.tags || [];
       const group = tags.length > 0 ? tags[0] : 'untagged';

@@ -3,6 +3,7 @@ import path from 'path';
 import { ConfigSchema, ObsidianConfig } from '../types/Config';
 import { ProcessedFile, GeneratedPage } from '../types/ParsedContent';
 import { FileSystem } from '../utils/FileSystem';
+import { PathResolver } from '../utils/PathResolver';
 
 export const escape = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -37,7 +38,7 @@ export class Publishing {
 
   t(en: string, ko: string): string { return this.options.language === 'ko' ? ko : en; }
   url(outputPath: string): string {
-    return this.config.basePath + path.relative(this.config.output, outputPath).split(path.sep).join('/');
+    return PathResolver.toUrlPath(outputPath, this.config.output, this.config.basePath);
   }
   absolute(url: string): string | undefined {
     if (!this.config.site.url) return undefined;

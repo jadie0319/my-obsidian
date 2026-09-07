@@ -5,6 +5,7 @@ import { registerHelpers } from '../templates/helpers';
 import { GraphDataGenerator } from './GraphDataGenerator';
 import path from 'path';
 import { json } from './Publishing';
+import { PathResolver } from '../utils/PathResolver';
 
 export interface PageRef {
   title: string;
@@ -31,8 +32,7 @@ export class HTMLGenerator {
     const nameToPage = new Map<string, PageInfo>();
 
     for (const file of processedFiles) {
-      const relativePath = path.relative(this.config.output, file.outputPath);
-      const url = this.config.basePath + relativePath.split(path.sep).join('/');
+      const url = PathResolver.toUrlPath(file.outputPath, this.config.output, this.config.basePath);
       const basename = path.basename(file.sourcePath, '.md');
       const pageInfo: PageInfo = { title: file.title, url, slug: file.slug };
 
@@ -50,8 +50,7 @@ export class HTMLGenerator {
     }
 
     for (const file of processedFiles) {
-      const relativePath = path.relative(this.config.output, file.outputPath);
-      const fileUrl = this.config.basePath + relativePath.split(path.sep).join('/');
+      const fileUrl = PathResolver.toUrlPath(file.outputPath, this.config.output, this.config.basePath);
       const fileRef: PageRef = { title: file.title, url: fileUrl };
       const seenTargets = new Set<string>();
 
@@ -113,8 +112,7 @@ export class HTMLGenerator {
 
     for (const page of pages) {
       const tags = (page.frontmatter.tags as string[] | undefined) || [];
-      const relativePath = path.relative(this.config.output, page.outputPath);
-      const url = this.config.basePath + relativePath.split(path.sep).join('/');
+      const url = PathResolver.toUrlPath(page.outputPath, this.config.output, this.config.basePath);
 
       for (const tag of tags) {
         if (!tagMap.has(tag)) {
@@ -173,8 +171,7 @@ export class HTMLGenerator {
     });
 
     const pageList = sortedPages.map(page => {
-      const relativePath = path.relative(this.config.output, page.outputPath);
-      const url = this.config.basePath + relativePath.split(path.sep).join('/');
+      const url = PathResolver.toUrlPath(page.outputPath, this.config.output, this.config.basePath);
 
       return {
         title: page.title,

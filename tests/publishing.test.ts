@@ -5,6 +5,7 @@ import { load } from 'cheerio';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ConfigSchema } from '../src/types/Config';
 import { SiteBuilder } from '../src/core/SiteBuilder';
+import { PathResolver } from '../src/utils/PathResolver';
 
 const directories: string[] = [];
 afterEach(async () => { await Promise.all(directories.splice(0).map(dir => fs.remove(dir))); });
@@ -22,6 +23,17 @@ async function fixture(basePath = '/garden/') {
 }
 
 describe('publishing pipeline', () => {
+  it('uses permalink routes and generates redirects for old routes', async () => {
+    const { source, output, config } = await fixture();
+    await fs.writeFile(path.join(source, 'First.md'), '---\ntitle: First\ncreated: 2026-01-01\npermalink: /notes/first/\nredirectFrom: [/old-first.html]\n---\n# First');
+    const result = await new SiteBuilder(config).build();
+    expect(result.deadLinks).toEqual([]);
+    expect(await fs.pathExists(path.join(output, 'notes/first/index.html'))).toBe(true);
+    expect(await fs.pathExists(path.join(output, 'old-first.html'))).toBe(true);
+    expect((await fs.readFile(path.join(output, 'old-first.html'), 'utf8'))).toContain('location.replace');
+    expect(PathResolver.fromPermalink('/notes/first/', output)).toBe(path.join(output, 'notes/first/index.html'));
+  });
+
   it.each(['/', '/garden/'])('builds discoverable pages, RSS and stable headings at %s', async basePath => {
     const { config, output } = await fixture(basePath);
     const result = await new SiteBuilder(config).build();

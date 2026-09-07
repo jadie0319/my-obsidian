@@ -203,6 +203,7 @@ seriesOrder: 1
 
 - `status`: `seedling`(초기 메모), `budding`(정리 중), `evergreen`(완성)을 표시합니다.
 - 같은 `series`의 글은 `seriesOrder` 오름차순으로 연결됩니다. 순서가 같으면 생성일, URL 순으로 정렬합니다. 시리즈 목차와 이전·다음 글이 자동 생성됩니다.
+- `permalink`는 글의 고정 주소를 지정합니다. 주소를 바꿀 때는 `redirectFrom`에 이전 site-relative 주소를 배열로 넣으면 이전 주소에서 새 주소로 자동 이동합니다. 두 값은 `/notes/my-post/` 또는 `/notes/my-post.html` 형식을 사용해야 합니다.
 - `draft: true`, `published: false`, 또는 `status: draft`인 글은 HTML·목록·검색·그래프·RSS·사이트맵에서 제외됩니다. 기존에 생성한 글을 초안으로 바꾸면 잔여 HTML도 삭제합니다. 첨부 파일은 기존처럼 복사되므로 민감한 자료는 vault 밖에 보관하세요.
 - `created` 최신순으로 정렬하며 없거나 유효하지 않으면 `modified`를 사용합니다. 파일 생성 시각은 CI checkout 시 바뀔 수 있으므로 실제 작성 시각은 frontmatter에 기록하세요.
 
