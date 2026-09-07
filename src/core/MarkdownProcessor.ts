@@ -27,7 +27,8 @@ export class MarkdownProcessor {
     this.wikiLinkResolver = new WikiLinkResolver(
       vaultFiles,
       config.output,
-      config.source
+      config.source,
+      config.basePath
     );
   }
 

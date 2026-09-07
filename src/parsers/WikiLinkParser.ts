@@ -5,8 +5,8 @@ import path from 'path';
 export class WikiLinkResolver {
   private permalinkMap: Map<string, string>;
 
-  constructor(vaultFiles: VaultFile[], outputRoot: string, sourceRoot: string) {
-    this.permalinkMap = this.buildPermalinkMap(vaultFiles, outputRoot, sourceRoot);
+  constructor(vaultFiles: VaultFile[], outputRoot: string, sourceRoot: string, basePath = '/') {
+    this.permalinkMap = this.buildPermalinkMap(vaultFiles, outputRoot, sourceRoot, basePath);
   }
 
   resolve(wikiLink: string): { url: string | null; alias: string | null } {
@@ -45,15 +45,15 @@ export class WikiLinkResolver {
   private buildPermalinkMap(
     vaultFiles: VaultFile[],
     outputRoot: string,
-    sourceRoot: string
+    sourceRoot: string,
+    basePath: string
   ): Map<string, string> {
     const map = new Map<string, string>();
 
     for (const file of vaultFiles) {
       const filename = path.basename(file.path, '.md');
       const outputPath = PathResolver.toOutputPath(file.absolutePath, sourceRoot, outputRoot);
-      const relativePath = path.relative(outputRoot, outputPath);
-      const urlPath = '/' + relativePath.split(path.sep).join('/');
+      const urlPath = PathResolver.toUrlPath(outputPath, outputRoot, basePath);
 
       map.set(filename, urlPath);
       map.set(file.path, urlPath);
