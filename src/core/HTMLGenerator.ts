@@ -154,10 +154,20 @@ export class HTMLGenerator {
   }
 
   generateIndex(pages: GeneratedPage[], processedFiles: ProcessedFile[]): GeneratedPage {
+    const timestamp = (value: unknown): number => {
+      const time = value instanceof Date
+        ? value.getTime()
+        : typeof value === 'string' && value.trim() ? Date.parse(value) : NaN;
+      return Number.isFinite(time) ? time : Number.NEGATIVE_INFINITY;
+    };
+    const createdTime = (page: GeneratedPage): number => {
+      const created = timestamp(page.frontmatter.created);
+      return Number.isFinite(created) ? created : timestamp(page.frontmatter.modified);
+    };
     const sortedPages = [...pages].sort((a, b) => {
-      const dateA = String(a.frontmatter.date || '');
-      const dateB = String(b.frontmatter.date || '');
-      return dateB.localeCompare(dateA);
+      return (createdTime(b) - createdTime(a))
+        || (timestamp(b.frontmatter.modified) - timestamp(a.frontmatter.modified))
+        || 0;
     });
 
     const pageList = sortedPages.map(page => {

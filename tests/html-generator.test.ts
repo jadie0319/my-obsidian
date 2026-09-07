@@ -47,6 +47,32 @@ function createProcessedFile(name: string, outputPath: string): ProcessedFile {
 }
 
 describe('HTMLGenerator', () => {
+  it('sorts recent uploads by created, falling back to modified and ignoring date', async () => {
+    const config = createConfig('/');
+    const generator = new HTMLGenerator(config);
+    await generator.initialize();
+
+    const metadata = [
+      { created: '2026-09-01', modified: '2026-09-10', date: '2099-01-01' },
+      {},
+      { created: 'invalid', modified: '2026-09-05' },
+      { created: new Date('2026-09-07T00:00:00Z'), modified: '2026-09-08' },
+      { created: '2026-09-07T09:00:00+09:00', modified: '2026-09-09' },
+      { modified: '2026-09-06' },
+    ];
+    const files = metadata.map((frontmatter, i) => ({
+      ...createProcessedFile(`Note${i}`, path.join(config.output, `note${i}.html`)),
+      frontmatter,
+    }));
+    const index = generator.generateIndex(files.map(file => generator.generatePage(file)), files);
+    const match = index.content.match(/var recentPages = (\[.*\]);/);
+    expect(match).not.toBeNull();
+    const recentPages = JSON.parse(match![1]) as { title: string }[];
+    expect(recentPages.map(page => page.title)).toEqual([
+      'Note4', 'Note3', 'Note5', 'Note2', 'Note0', 'Note1',
+    ]);
+  });
+
   it('renders asset and page URLs under the configured basePath', async () => {
     const config = createConfig('/project-site/');
     const generator = new HTMLGenerator(config);
