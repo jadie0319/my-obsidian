@@ -334,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const graphData = JSON.parse(graphDataElement.textContent);
 
   const containerEl = document.getElementById('graph-container');
+  if (!containerEl || typeof d3 === 'undefined') return;
   const containerWidth = containerEl ? (containerEl.clientWidth || containerEl.offsetWidth) : window.innerWidth;
 
   const graphView = new GraphView('graph-container', graphData, {
@@ -390,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', () => {
     const resizeContainer = document.getElementById('graph-container');
     const newWidth = resizeContainer ? (resizeContainer.clientWidth || resizeContainer.offsetWidth) : window.innerWidth;
+    if (!newWidth) return;
     const newHeight = Math.max(600, window.innerHeight * 0.7);
 
     graphView.options.width = newWidth;

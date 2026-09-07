@@ -6,6 +6,16 @@ export const ConfigSchema = z.object({
   exclude: z.array(z.string()).default([]),
   basePath: z.string().default('/'),
   template: z.string().default('default'),
+  publishing: z.object({
+    language: z.enum(['ko', 'en']).default('en'),
+    homeOrder: z.array(z.enum(['intro', 'recent', 'topics', 'graph'])).default(['intro', 'recent', 'topics', 'graph']),
+    search: z.boolean().default(true),
+    previews: z.boolean().default(true),
+    localGraph: z.boolean().default(true),
+    rss: z.boolean().default(true),
+    checkLinks: z.boolean().default(true),
+    strictLinks: z.boolean().default(false),
+  }).optional(),
 
   site: z.object({
     title: z.string().default('My Digital Garden'),

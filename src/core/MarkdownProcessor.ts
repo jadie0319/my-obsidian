@@ -111,8 +111,8 @@ export class MarkdownProcessor {
 
             const { url, alias } = resolver.resolve(fullMatch);
 
+            links.push(linkText);
             if (url) {
-              links.push(linkText);
               newNodes.push({
                 type: 'link' as const,
                 url,

@@ -180,6 +180,63 @@ my-obsidian build --source ./vault --output ./dist --base-path /your-repo-name/
 
 ## Obsidian 기능 지원
 
+### 검색, 목록, 시리즈와 공개 상태
+
+모든 페이지에 전체 글 목록과 제목·본문·태그 검색이 제공됩니다. 검색창은 `Ctrl+K` 또는 `Cmd+K`로 열 수 있고, `#태그` 검색과 방향키·Enter 탐색을 지원합니다. 검색은 정적 JSON을 브라우저에서 불러오며 별도 서버가 필요 없습니다. 한국어도 부분 문자열로 검색합니다.
+
+홈은 소개, 최신 글, 주제, 접이식 그래프 순서입니다. 최신 글에는 생성일·요약·태그·상태를 표시합니다. `description`이 없으면 본문에서 요약을 추출합니다. 전체 글 목록(`/archive.html`)에서는 최신순·제목순 정렬과 태그 필터를 사용할 수 있습니다.
+
+글에는 접이식 모바일 목차, 제목별 링크 복사, 내부 링크 미리보기, 주변 글 그래프가 추가됩니다. 본문의 첫 H1이 페이지 제목과 같으면 중복 표시하지 않습니다. 모바일 터치에서는 링크가 바로 이동합니다.
+
+```yaml
+---
+title: 리팩터링 시작하기
+created: "2026-09-07T10:00:00+09:00"
+modified: "2026-09-07T11:00:00+09:00"
+description: 리팩터링을 시작하기 전에 알아둘 기본 원칙
+tags: [refactoring]
+status: budding
+series: 리팩터링 스터디
+seriesOrder: 1
+---
+```
+
+- `status`: `seedling`(초기 메모), `budding`(정리 중), `evergreen`(완성)을 표시합니다.
+- 같은 `series`의 글은 `seriesOrder` 오름차순으로 연결됩니다. 순서가 같으면 생성일, URL 순으로 정렬합니다. 시리즈 목차와 이전·다음 글이 자동 생성됩니다.
+- `draft: true`, `published: false`, 또는 `status: draft`인 글은 HTML·목록·검색·그래프·RSS·사이트맵에서 제외됩니다. 기존에 생성한 글을 초안으로 바꾸면 잔여 HTML도 삭제합니다. 첨부 파일은 기존처럼 복사되므로 민감한 자료는 vault 밖에 보관하세요.
+- `created` 최신순으로 정렬하며 없거나 유효하지 않으면 `modified`를 사용합니다. 파일 생성 시각은 CI checkout 시 바뀔 수 있으므로 실제 작성 시각은 frontmatter에 기록하세요.
+
+설정 파일의 선택 항목 `publishing`으로 표시 언어와 홈 순서, 기능을 변경할 수 있습니다. 예시에서 `site.url`은 실제 배포 주소로 바꾸세요.
+
+```json
+{
+  "source": "./vault",
+  "output": "./public",
+  "basePath": "/your-repo-name/",
+  "site": {
+    "title": "My Digital Garden",
+    "description": "배우고 연결하며 정리하는 노트",
+    "url": "https://your-username.github.io/your-repo-name"
+  },
+  "publishing": {
+    "language": "ko",
+    "homeOrder": ["intro", "recent", "topics", "graph"],
+    "search": true,
+    "previews": true,
+    "localGraph": true,
+    "rss": true,
+    "checkLinks": true,
+    "strictLinks": false
+  }
+}
+```
+
+기본 언어는 `en`이며 `ko`도 지원합니다. `homeOrder`에서 섹션을 빼면 해당 섹션이 숨겨집니다. RSS는 `site.url`이 있을 때 `/feed.xml`로 생성되며 최신 50개 글을 포함합니다. 같은 주소를 기준으로 canonical 및 Open Graph 공유 정보를 생성합니다. `site.url`이 없으면 절대 주소가 필요한 RSS와 canonical은 생략됩니다.
+
+빌드 시 내부 링크, 이미지·스크립트·스타일 파일과 제목 앵커를 검사합니다. 외부 사이트는 조회하지 않습니다. 기본은 경고이며, `strictLinks: true`로 설정하면 깨진 링크가 있는 빌드는 실패합니다. `archive.html`, 인덱스 생성 시 `index.html`과 `tags/`는 생성기에서 사용하므로 노트 출력 경로와 겹치면 빌드를 중단합니다.
+
+`assets/search-index.json`과 추가 UI 리소스는 위 기능을 위해 생성됩니다. `.generated-pages.json`은 이전 빌드의 잔여 페이지 정리에 사용하므로 출력 폴더 안에서 유지하세요. 사이트 배포 시에는 빌드 결과 폴더 전체를 업로드하세요.
+
 ### WikiLinks
 
 ```markdown
@@ -283,4 +340,3 @@ MIT
 ## 기여
 
 이슈와 Pull Request는 환영합니다!
-

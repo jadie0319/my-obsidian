@@ -4,6 +4,7 @@ import { TemplateEngine } from '../templates/TemplateEngine';
 import { registerHelpers } from '../templates/helpers';
 import { GraphDataGenerator } from './GraphDataGenerator';
 import path from 'path';
+import { json } from './Publishing';
 
 export interface PageRef {
   title: string;
@@ -54,7 +55,8 @@ export class HTMLGenerator {
       const fileRef: PageRef = { title: file.title, url: fileUrl };
       const seenTargets = new Set<string>();
 
-      for (const linkText of file.links) {
+      for (const rawLink of file.links) {
+        const linkText = rawLink.split('|')[0].split('#')[0].trim();
         let target = nameToPage.get(linkText) || nameToPage.get(linkText.toLowerCase());
         if (!target) {
           const lowerLink = linkText.toLowerCase();
@@ -190,8 +192,8 @@ export class HTMLGenerator {
       description: this.config.site.description,
       pages: pageList,
       basePath: this.config.basePath,
-      graphData: JSON.stringify(graphData),
-      recentPages: JSON.stringify(pageList.slice(0, 10)),
+      graphData: json(graphData),
+      recentPages: json(pageList.slice(0, 10)),
     });
 
     return {
