@@ -20,6 +20,7 @@ class GraphView {
     this.simulation = null;
     this.g = null;
     this.tooltip = null;
+    this.zoom = null;
     this.currentZoom = 1;
     this.nodeLabels = null;
   }
@@ -183,7 +184,7 @@ class GraphView {
   }
 
   setupZoom() {
-    const zoom = d3.zoom()
+    this.zoom = d3.zoom()
       .scaleExtent([0.1, 4])
       .on('zoom', (event) => {
         this.currentZoom = event.transform.k;
@@ -191,7 +192,16 @@ class GraphView {
         this.updateNodeLabels();
       });
 
-    this.svg.call(zoom);
+    this.svg.call(this.zoom);
+
+    // Start slightly zoomed out so the full network is readable on first load.
+    const initialScale = 0.6;
+    const offsetX = (this.options.width * (1 - initialScale)) / 2;
+    const offsetY = (this.options.height * (1 - initialScale)) / 2;
+    const initialTransform = d3.zoomIdentity
+      .translate(offsetX, offsetY)
+      .scale(initialScale);
+    this.svg.call(this.zoom.transform, initialTransform);
   }
 
   showTooltip(event, d) {
